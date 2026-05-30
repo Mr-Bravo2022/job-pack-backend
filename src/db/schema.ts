@@ -1,7 +1,7 @@
-import Database from 'better-sqlite3';
+import { Database } from 'sql.js';
 
-export function runMigrations(db: Database.Database): void {
-  db.exec(`
+export function runMigrations(db: Database): void {
+  db.run(`
     CREATE TABLE IF NOT EXISTS drafts (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
