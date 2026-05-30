@@ -25,19 +25,27 @@ router.post('/api/generate', async (ctx) => {
   const structured = parseResponse(raw);
   const artifacts = generateArtifacts(structured);
 
-  // Generate PDFs in parallel
-  const [resumePdfBuffer, coverLetterPdfBuffer] = await Promise.all([
-    htmlToPdf(artifacts.resumeHtml),
-    htmlToPdf(artifacts.coverLetterHtml),
-  ]);
+  // Generate PDFs — fail gracefully if puppeteer is unavailable on this host
+  let resumePdfBase64: string | null = null;
+  let coverLetterPdfBase64: string | null = null;
+  try {
+    const [resumePdfBuffer, coverLetterPdfBuffer] = await Promise.all([
+      htmlToPdf(artifacts.resumeHtml),
+      htmlToPdf(artifacts.coverLetterHtml),
+    ]);
+    resumePdfBase64 = resumePdfBuffer.toString('base64');
+    coverLetterPdfBase64 = coverLetterPdfBuffer.toString('base64');
+  } catch (pdfErr) {
+    console.warn('PDF generation unavailable:', (pdfErr as Error).message);
+  }
 
   ctx.body = {
     resumeHtml: artifacts.resumeHtml,
     coverLetterHtml: artifacts.coverLetterHtml,
     infographicSvg: artifacts.infographicSvg,
-    infographicData: structured.infographic,   // expose structured data for editing
-    resumePdfBase64: resumePdfBuffer.toString('base64'),
-    coverLetterPdfBase64: coverLetterPdfBuffer.toString('base64'),
+    infographicData: structured.infographic,
+    resumePdfBase64,
+    coverLetterPdfBase64,
   };
 });
 
