@@ -4,9 +4,17 @@ let browser: Browser | null = null;
 
 async function getBrowser(): Promise<Browser> {
   if (!browser || !browser.connected) {
+    const isProduction = process.env.NODE_ENV === 'production';
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      // On Render (Linux), use the system Chromium instead of the bundled one
+      executablePath: isProduction ? '/usr/bin/chromium-browser' : undefined,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
     });
   }
   return browser;
