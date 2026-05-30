@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import Koa from 'koa';
 import { bodyParser } from '@koa/bodyparser';
-import cors from 'koa-cors';
+import cors from '@koa/cors';
 import serve from 'koa-static';
 import generateRouter from './routes/generate';
 import draftsRouter from './routes/drafts';
